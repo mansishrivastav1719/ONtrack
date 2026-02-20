@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: ontrack-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: dropout_prediction
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ontrack-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (FastAPI)
+  backend:
+    build: ./backend
+    container_name: ontrack-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017
+      - MONGO_DB=dropout_prediction
+      - MONGO_COLLECTION=students
+      - MODEL_PATH=/app/model/xgboost_model.pkl
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    volumes:
+      - ./model:/app/model  # Mount model directory
+      - ./backend:/app      # Mount for development (remove in production)
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - ontrack-network
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend (React)
+  frontend:
+    build: ./frontend
+    container_name: ontrack-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_API_TIMEOUT=30000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - ontrack-network
+    command: npm start
+
+  # MongoDB Admin Interface (optional - for debugging)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: ontrack-mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    depends_on:
+      - mongodb
+    networks:
+      - ontrack-network
+
+volumes:
+  mongodb_data:
+    name: ontrack-mongodb-data
+
+networks:
+  ontrack-network:
+    name: ontrack-network
+    driver: bridge
