@@ -1,6 +1,5 @@
 import joblib
 import numpy as np
-import pandas as pd
 import shap
 from config import config
 import logging

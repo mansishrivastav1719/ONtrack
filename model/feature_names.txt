@@ -1,0 +1,5 @@
+gpa
+attendance
+assignments_submitted
+extracurricular
+age
