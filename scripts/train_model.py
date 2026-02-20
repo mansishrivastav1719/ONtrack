@@ -50,19 +50,18 @@ def train_xgboost_model(X_train, y_train, X_val=None, y_val=None):
         colsample_bytree=0.8,
         random_state=42,
         eval_metric='logloss',
-        use_label_encoder=False
+        use_label_encoder=False,
+        early_stopping_rounds=20  # Move this HERE, inside the model initialization
     )
     
     # Train model
     if X_val is not None and y_val is not None:
-        # Use validation set for early stopping
         model.fit(
             X_train, y_train,
             eval_set=[(X_val, y_val)],
-            early_stopping_rounds=20,
             verbose=False
         )
-        print(f"✅ Best iteration: {model.best_iteration}")
+        print(f"✅ Best iteration: {model.best_iteration if hasattr(model, 'best_iteration') else 'N/A'}")
     else:
         # Simple training
         model.fit(X_train, y_train)
