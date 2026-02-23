@@ -37,7 +37,7 @@ export function AppSidebar({ onLogout, role }: { onLogout: () => void; role: Use
         </div>
         {!collapsed && (
           <span className="text-sm font-bold tracking-tight text-sidebar-primary-foreground font-[Space_Grotesk]">
-            DropGuard
+            ONtrack
           </span>
         )}
       </div>

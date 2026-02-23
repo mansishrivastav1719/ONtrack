@@ -24,7 +24,7 @@ export default function Login({ onLogin }: { onLogin: (role: UserRole) => void }
             <GraduationCap className="h-7 w-7 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">DropGuard</h1>
+            <h1 className="text-2xl font-bold tracking-tight">ONtrack</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Student Dropout Prediction Dashboard
             </p>
